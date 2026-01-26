@@ -30,7 +30,9 @@ class LassoTool(EditingTool):
 
     def mouseDown(self, point, clickCount):
         self.pen = None
-        if self.selection.hasSelection():
+        # from RF4.6+
+        # if self.mouseDownInSelection():
+        if self._pointInSelection:
             return
         self.pen = self.selectionContourLayer.getPen(clear=True)
         self.pen.moveTo((point.x, point.y))
@@ -50,15 +52,21 @@ class LassoTool(EditingTool):
         for contour in glyph:
             for point in contour.points:
                 result = containsPoint((point.x, point.y))
-                if self.shiftDown:
-                    point.selected = not result
-                else:
-                    point.selected = result
+                if result:
+                    point.selected = True
+                elif not self.shiftDown:
+                    point.selected = False
 
         self.selectionContourLayer.setPath(None)
 
     def canSelectWithMarque(self):
         return False
+
+    def dragSelection(self, point, delta):
+        # From RF4.6+
+        # if self.mouseDownInSelection():
+        if self._pointInSelection:
+            super().dragSelection(point, delta)
 
     def getToolbarTip(self):
         return "Lasso Tool"
