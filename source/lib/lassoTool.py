@@ -5,6 +5,9 @@ from mojo.UI import getDefault, appearanceColorKey
 
 bundle = ExtensionBundle("Lasso Tool")
 toolbarIcon = bundle.get("LassoToolIcon")
+_cursorImage = bundle.getResourceImage("LassoToolCursor")
+_cursorImage.setTemplate_(True)
+_cursor = CreateCursor(_cursorImage, hotSpot=(4, 4))
 
 
 class LassoTool(EditingTool):
@@ -63,6 +66,9 @@ class LassoTool(EditingTool):
 
     def getToolbarIcon(self):
         return toolbarIcon
+
+    def getDefaultCursor(self):
+        return _cursor
 
 
 if __name__ == '__main__':
