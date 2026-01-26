@@ -1,10 +1,12 @@
 from mojo.events import EditingTool, installTool
 from mojo.extensions import ExtensionBundle
 from mojo.UI import getDefault, appearanceColorKey
+import AppKit
 
 
 bundle = ExtensionBundle("Lasso Tool")
 toolbarIcon = bundle.get("LassoToolIcon")
+_cursor = AppKit.NSCursor.crosshairCursor()
 
 
 class LassoTool(EditingTool):
@@ -63,6 +65,9 @@ class LassoTool(EditingTool):
 
     def getToolbarIcon(self):
         return toolbarIcon
+
+    def getDefaultCursor(self):
+        return _cursor
 
 
 if __name__ == '__main__':
