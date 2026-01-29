@@ -50,12 +50,26 @@ class LassoTool(EditingTool):
         containsPoint = self.selectionContourLayer.containsPoint
 
         for contour in glyph:
-            for point in contour.points:
-                result = containsPoint((point.x, point.y))
-                if result:
-                    point.selected = True
-                elif not self.shiftDown:
-                    point.selected = False
+            offcurves = [p for p in contour.points if p.type == 'offcurve']
+            oncurves = [p for p in contour.points if p not in offcurves]
+            # only select offcurves when option is down
+            if self.optionDown:
+                for point in offcurves:
+                    result = containsPoint((point.x, point.y))
+                    if result:
+                        point.selected = True
+                    elif not self.shiftDown:
+                        point.selected = False
+
+            # only select oncurves otherwise
+            # (this is analog to the default selection marquee)
+            else:
+                for point in oncurves:
+                    result = containsPoint((point.x, point.y))
+                    if result:
+                        point.selected = True
+                    elif not self.shiftDown:
+                        point.selected = False
 
         self.selectionContourLayer.setPath(None)
 
