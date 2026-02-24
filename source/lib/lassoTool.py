@@ -1,6 +1,7 @@
 from mojo.events import EditingTool, installTool
 from mojo.extensions import ExtensionBundle
 from mojo.UI import getDefault, appearanceColorKey
+import mojo
 import AppKit
 
 
@@ -11,6 +12,8 @@ _cursor = AppKit.NSCursor.crosshairCursor()
 
 class LassoTool(EditingTool):
 
+    version = float(mojo.roboFont.version.replace('b', ''))
+
     def setup(self):
         container = self.extensionContainer(
             identifier="LassoTool.foreground",
@@ -18,7 +21,12 @@ class LassoTool(EditingTool):
             clear=True
         )
 
-        self.selectionFillColor = getDefault(appearanceColorKey("glyphViewSelectionMarqueColor"))
+        if self.version < 4.6:
+            self.selectionFillColor = getDefault(appearanceColorKey(
+                "glyphViewSelectionMarqueColor"))
+        else:
+            self.selectionFillColor = getDefault(appearanceColorKey(
+                "glyphViewSelectionMarqueeColor"))
         r, g, b, a = self.selectionFillColor
         self.selectionStrokeColor = (r, g, b, 1)
 
@@ -30,10 +38,13 @@ class LassoTool(EditingTool):
 
     def mouseDown(self, point, clickCount):
         self.pen = None
-        # from RF4.6+
-        # if self.mouseDownInSelection():
-        if self._pointInSelection:
-            return
+        if self.version < 4.6:
+            if self._pointInSelection:
+                return
+        else:
+            if self.mouseDownInSelection():
+                return
+
         self.pen = self.selectionContourLayer.getPen(clear=True)
         self.pen.moveTo((point.x, point.y))
         self.pen.endPath()
@@ -74,13 +85,20 @@ class LassoTool(EditingTool):
         self.selectionContourLayer.setPath(None)
 
     def canSelectWithMarque(self):
+        # < 4.6
+        return False
+
+    def canSelectWithMarquee(self):
+        # > 4.6
         return False
 
     def dragSelection(self, point, delta):
-        # From RF4.6+
-        # if self.mouseDownInSelection():
-        if self._pointInSelection:
-            super().dragSelection(point, delta)
+        if self.version < 4.6:
+            if self._pointInSelection:
+                super().dragSelection(point, delta)
+        else:
+            if self.mouseDownInSelection():
+                super().dragSelection(point, delta)
 
     def getToolbarTip(self):
         return "Lasso Tool"
